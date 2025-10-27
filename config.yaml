@@ -1,0 +1,83 @@
+# Active profile name
+active_profile: home
+
+# Default policies when no rule matches
+default_policy:
+  inbound: ALLOW    # ALLOW or BLOCK
+  outbound: ALLOW   # ALLOW or BLOCK
+
+# Scapy sniff settings
+sniff:
+  iface: any          # e.g., "any", "eth0", "wlan0"
+  bpf: "tcp or udp or icmp"
+
+# Auto-block (port scan / abuse) detection
+auto_block:
+  enabled: true
+  window_seconds: 5
+  distinct_ports_threshold: 12
+  block_minutes: 10
+  directions: [INCOMING]   # monitor only these directions for auto-block
+
+# Logging
+logging:
+  directory: logs
+  level: INFO
+
+# Rules
+rules:
+  - id: "allow-localhost"
+    description: "Allow localhost"
+    action: ALLOW
+    direction: ANY
+    protocol: ANY
+    src_ip: "127.0.0.1/8"
+    dst_ip: "127.0.0.1/8"
+    priority: 1
+    log: false
+    enabled: true
+    profiles: [home, office, public]
+
+  - id: "block-bad-host"
+    description: "Block traffic from 203.0.113.100"
+    action: BLOCK
+    direction: INCOMING
+    protocol: ANY
+    src_ip: "203.0.113.100"
+    priority: 10
+    log: true
+    enabled: false
+    profiles: [home, office, public]
+
+  - id: "allow-ssh-out"
+    description: "Allow outgoing SSH"
+    action: ALLOW
+    direction: OUTGOING
+    protocol: TCP
+    dst_port: "22"
+    priority: 20
+    log: true
+    enabled: true
+    profiles: [home, office, public]
+
+  - id: "block-telnet-in"
+    description: "Block incoming Telnet"
+    action: BLOCK
+    direction: INCOMING
+    protocol: TCP
+    dst_port: "23"
+    priority: 30
+    log: true
+    enabled: true
+    profiles: [home, office, public]
+
+  - id: "allow-web-out"
+    description: "Allow outgoing web"
+    action: ALLOW
+    direction: OUTGOING
+    protocol: TCP
+    dst_port: "80,443"
+    priority: 30
+    log: false
+    enabled: true
+    profiles: [home, office, public]
